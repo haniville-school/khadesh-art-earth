@@ -71,12 +71,23 @@ export async function resolveBankAccount(
 
 /** List Nigerian banks (for populating a bank-select dropdown). */
 export async function listBanks() {
-  const res = await fetch(`${PAYSTACK_BASE_URL}/bank?country=nigeria`, {
-    headers: paystackHeaders(),
-  });
+  const res = await fetch(
+    `${PAYSTACK_BASE_URL}/bank?country=nigeria&type=nuban`,
+    { headers: paystackHeaders() }
+  );
   const json = await res.json();
   if (!res.ok) {
     throw new Error(json.message || "Could not fetch bank list");
   }
-  return json.data as { name: string; code: string }[];
+
+  const banks = json.data as { id: number; name: string; code: string }[];
+
+  // Paystack can still return duplicate codes even filtered by type,
+  // so dedupe by code and keep id around as a guaranteed-unique key.
+  const seen = new Set<string>();
+  return banks.filter((bank) => {
+    if (seen.has(bank.code)) return false;
+    seen.add(bank.code);
+    return true;
+  });
 }

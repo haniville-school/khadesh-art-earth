@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type Bank = { name: string; code: string };
+type Bank = { id: number; name: string; code: string };
 
 export default function VendorApplyPage() {
   const [storeName, setStoreName] = useState("");
@@ -91,8 +91,9 @@ export default function VendorApplyPage() {
             required
           >
             <option value="">Select your bank</option>
+            <option value="001">Test Bank (dev only)</option>
             {banks.map((bank) => (
-              <option key={bank.code} value={bank.code}>
+              <option key={bank.id} value={bank.code}>
                 {bank.name}
               </option>
             ))}
