@@ -11,7 +11,7 @@ type CreateSubaccountParams = {
   storeName: string;
   bankCode: string;
   accountNumber: string;
-  commissionPercent: number; // e.g. 10 means platform keeps 10%
+  commissionPercent: number;
 };
 
 type PaystackSubaccountResponse = {
@@ -24,11 +24,6 @@ type PaystackSubaccountResponse = {
   };
 };
 
-/**
- * Creates a Paystack subaccount for a vendor. Paystack's
- * `percentage_charge` on a subaccount is the share the SUBACCOUNT
- * (vendor) receives, so we pass (100 - commissionPercent).
- */
 export async function createPaystackSubaccount(
   params: CreateSubaccountParams
 ): Promise<PaystackSubaccountResponse> {
@@ -50,10 +45,6 @@ export async function createPaystackSubaccount(
   return json;
 }
 
-/**
- * Resolves an account number to a name before submission, so vendors
- * can confirm the account is theirs before you create the subaccount.
- */
 export async function resolveBankAccount(
   accountNumber: string,
   bankCode: string
@@ -69,12 +60,72 @@ export async function resolveBankAccount(
   return json.data as { account_number: string; account_name: string };
 }
 
-/** List Nigerian banks (for populating a bank-select dropdown). */
+export { calculateTransactionFee } from "@/lib/fees";
+
+type SplitSubaccount = {
+  subaccount: string;
+  share: number;
+};
+
+type InitializeTransactionParams = {
+  email: string;
+  amountKobo: number;
+  reference: string;
+  callbackUrl: string;
+  subaccounts: SplitSubaccount[];
+  metadata?: Record<string, unknown>;
+};
+
+export async function initializeTransaction(params: InitializeTransactionParams) {
+  const res = await fetch(`${PAYSTACK_BASE_URL}/transaction/initialize`, {
+    method: "POST",
+    headers: paystackHeaders(),
+    body: JSON.stringify({
+      email: params.email,
+      amount: params.amountKobo,
+      reference: params.reference,
+      callback_url: params.callbackUrl,
+      metadata: params.metadata,
+      split: {
+        type: "flat",
+        bearer_type: "account",
+        subaccounts: params.subaccounts,
+      },
+    }),
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json.message || "Failed to initialize transaction");
+  }
+  return json.data as { authorization_url: string; access_code: string; reference: string };
+}
+
+export async function verifyTransaction(reference: string) {
+  const res = await fetch(`${PAYSTACK_BASE_URL}/transaction/verify/${reference}`, {
+    headers: paystackHeaders(),
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json.message || "Could not verify transaction");
+  }
+  return json.data as { status: string; reference: string; amount: number };
+}
+
+export function verifyPaystackSignature(rawBody: string, signatureHeader: string | null) {
+  if (!signatureHeader) return false;
+  const crypto = require("crypto");
+  const hash = crypto
+    .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!)
+    .update(rawBody)
+    .digest("hex");
+  return hash === signatureHeader;
+}
+
 export async function listBanks() {
-  const res = await fetch(
-    `${PAYSTACK_BASE_URL}/bank?country=nigeria&type=nuban`,
-    { headers: paystackHeaders() }
-  );
+  const res = await fetch(`${PAYSTACK_BASE_URL}/bank?country=nigeria&type=nuban`, {
+    headers: paystackHeaders(),
+  });
   const json = await res.json();
   if (!res.ok) {
     throw new Error(json.message || "Could not fetch bank list");
@@ -82,8 +133,6 @@ export async function listBanks() {
 
   const banks = json.data as { id: number; name: string; code: string }[];
 
-  // Paystack can still return duplicate codes even filtered by type,
-  // so dedupe by code and keep id around as a guaranteed-unique key.
   const seen = new Set<string>();
   return banks.filter((bank) => {
     if (seen.has(bank.code)) return false;

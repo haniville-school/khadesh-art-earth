@@ -1,0 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/lib/cart/cart-context";
+
+type Props = {
+  productId: string;
+  vendorId: string;
+  title: string;
+  price: number;
+  image: string | null;
+  stock: number;
+};
+
+export default function AddToCartButton(props: Props) {
+  const { addItem } = useCart();
+  const router = useRouter();
+  const [added, setAdded] = useState(false);
+
+  function handleClick() {
+    addItem({
+      productId: props.productId,
+      vendorId: props.vendorId,
+      title: props.title,
+      price: props.price,
+      image: props.image,
+      stock: props.stock,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={handleClick}
+        disabled={props.stock === 0}
+        className="w-full bg-black text-white rounded px-4 py-3 disabled:opacity-50"
+      >
+        {props.stock === 0 ? "Out of stock" : added ? "Added ✓" : "Add to cart"}
+      </button>
+      {added && (
+        <button
+          onClick={() => router.push("/cart")}
+          className="w-full border rounded px-4 py-2 text-sm"
+        >
+          View cart
+        </button>
+      )}
+    </div>
+  );
+}
