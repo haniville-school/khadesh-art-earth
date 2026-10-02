@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart/cart-context";
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
   const searchParams = useSearchParams();
   const reference = searchParams.get("reference");
   const { clearCart } = useCart();
@@ -79,5 +79,13 @@ export default function OrderConfirmationPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="max-w-md mx-auto py-20 px-4 text-center">Loading...</div>}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }
