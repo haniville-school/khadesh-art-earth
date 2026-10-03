@@ -7,17 +7,25 @@ export default function Header() {
   const { totalItems } = useCart();
 
   return (
-    <header className="border-b">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="font-semibold text-lg">
-          Your Store
+    <header className="border-b border-[var(--color-line)] bg-[var(--color-paper-light)]">
+      <div className="max-w-5xl mx-auto px-6 py-5 flex justify-between items-center">
+        <Link
+          href="/"
+          className="font-display italic text-2xl tracking-tight text-[var(--color-ink)]"
+        >
+          Khadesh Art
         </Link>
-        <nav className="flex items-center gap-4 text-sm">
-          <Link href="/vendor/apply">Sell on our store</Link>
-          <Link href="/cart" className="relative">
+        <nav className="flex items-center gap-6 text-sm">
+          <Link
+            href="/vendor/apply"
+            className="text-[var(--color-plum)] hover:underline underline-offset-4"
+          >
+            Sell with us
+          </Link>
+          <Link href="/cart" className="relative text-[var(--color-ink)]">
             Cart
             {totalItems > 0 && (
-              <span className="absolute -top-2 -right-3 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-2 -right-4 bg-[var(--color-ochre)] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                 {totalItems}
               </span>
             )}

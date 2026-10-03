@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { DashboardShell } from "@/app/components/dashboard-shell";
 import ProductActions from "./product-actions";
 
 export default async function VendorProductsPage() {
@@ -20,15 +21,15 @@ export default async function VendorProductsPage() {
 
   if (!vendor) {
     return (
-      <div className="max-w-2xl mx-auto py-12 px-4">
-        <p>
+      <DashboardShell title="Sell on Khadesh Art">
+        <p className="text-[var(--color-ink-70)]">
           You don&apos;t have a vendor account yet.{" "}
-          <Link href="/vendor/apply" className="underline">
+          <Link href="/vendor/apply" className="text-[var(--color-plum)] underline underline-offset-4">
             Apply here
           </Link>
           .
         </p>
-      </div>
+      </DashboardShell>
     );
   }
 
@@ -39,37 +40,36 @@ export default async function VendorProductsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">{vendor.store_name}&apos;s products</h1>
+    <DashboardShell
+      title={vendor.store_name}
+      subtitle={
+        vendor.status === "approved"
+          ? "Your listings"
+          : "Pending approval — listings won't be visible to customers yet"
+      }
+    >
+      <div className="flex justify-end mb-6">
         <Link
           href="/vendor/products/new"
-          className="bg-black text-white rounded px-4 py-2 text-sm"
+          className="bg-[var(--color-moss)] text-white rounded-sm px-4 py-2 text-sm hover:bg-[var(--color-moss-dark)] transition-colors"
         >
-          + Add product
+          Add a piece
         </Link>
       </div>
 
-      {vendor.status !== "approved" && (
-        <p className="text-sm text-amber-600 mb-6">
-          Your store is still pending approval. Products you create won&apos;t be
-          visible to customers until an admin approves your store.
+      {(!products || products.length === 0) && (
+        <p className="text-[var(--color-ink-60)] text-center py-12">
+          Nothing listed yet. Your first piece is one click away.
         </p>
       )}
 
-      <div className="space-y-3">
-        {(!products || products.length === 0) && (
-          <p className="text-gray-500">No products yet.</p>
-        )}
+      <div className="divide-y divide-[var(--color-line)]">
         {products?.map((product) => (
-          <div
-            key={product.id}
-            className="border rounded p-4 flex justify-between items-center"
-          >
-            <div>
-              <p className="font-medium">{product.title}</p>
-              <p className="text-sm text-gray-600">
-                ₦{Number(product.price).toLocaleString()} · stock: {product.stock} ·{" "}
+          <div key={product.id} className="flex justify-between items-center py-4 gap-4">
+            <div className="min-w-0">
+              <p className="truncate">{product.title}</p>
+              <p className="text-sm text-[var(--color-ink-50)]">
+                ₦{Number(product.price).toLocaleString()} · {product.stock} in stock ·{" "}
                 {product.status}
               </p>
             </div>
@@ -77,6 +77,6 @@ export default async function VendorProductsPage() {
           </div>
         ))}
       </div>
-    </div>
+    </DashboardShell>
   );
 }

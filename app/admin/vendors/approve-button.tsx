@@ -29,15 +29,15 @@ export default function ApproveButton({ vendorId }: { vendorId: string }) {
   }
 
   return (
-    <div className="text-right">
+    <div className="text-right shrink-0">
       <button
         onClick={handleApprove}
         disabled={loading}
-        className="bg-black text-white rounded px-3 py-1.5 text-sm disabled:opacity-50"
+        className="bg-[var(--color-moss)] text-white rounded-sm px-3 py-1.5 text-sm hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
       >
         {loading ? "Approving..." : "Approve"}
       </button>
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-[#A14A3F] mt-1">{error}</p>}
     </div>
   );
 }

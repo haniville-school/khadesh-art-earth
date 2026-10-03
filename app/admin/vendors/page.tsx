@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { DashboardShell } from "@/app/components/dashboard-shell";
 import ApproveButton from "./approve-button";
 
 export default async function AdminVendorsPage() {
@@ -9,9 +10,7 @@ export default async function AdminVendorsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -19,9 +18,7 @@ export default async function AdminVendorsPage() {
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") {
-    redirect("/");
-  }
+  if (profile?.role !== "admin") redirect("/");
 
   const { data: vendors } = await supabase
     .from("vendors")
@@ -32,19 +29,29 @@ export default async function AdminVendorsPage() {
   const others = vendors?.filter((v) => v.status !== "pending") ?? [];
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <h1 className="text-2xl font-semibold mb-6">Vendor applications</h1>
-
-      <h2 className="text-lg font-medium mb-3">Pending ({pending.length})</h2>
-      <div className="space-y-4 mb-10">
-        {pending.length === 0 && <p className="text-gray-500">Nothing pending.</p>}
+    <DashboardShell
+      title="Vendors"
+      nav={[
+        { href: "/admin", label: "Overview" },
+        { href: "/admin/vendors", label: "Vendors" },
+      ]}
+    >
+      <h2 className="text-sm text-[var(--color-ink-60)] mb-3">
+        Awaiting approval ({pending.length})
+      </h2>
+      <div className="divide-y divide-[var(--color-line)] mb-10">
+        {pending.length === 0 && (
+          <p className="text-[var(--color-ink-50)] py-4 text-sm">Nothing pending.</p>
+        )}
         {pending.map((vendor) => (
-          <div key={vendor.id} className="border rounded p-4 flex justify-between items-start">
-            <div>
-              <p className="font-medium">{vendor.store_name}</p>
-              <p className="text-sm text-gray-600">{vendor.description}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                Bank: {vendor.paystack_bank_code} · Acct: {vendor.paystack_account_number}
+          <div key={vendor.id} className="py-4 flex justify-between items-start gap-4">
+            <div className="min-w-0">
+              <p>{vendor.store_name}</p>
+              {vendor.description && (
+                <p className="text-sm text-[var(--color-ink-60)]">{vendor.description}</p>
+              )}
+              <p className="text-xs text-[var(--color-ink-40)] mt-1">
+                Bank {vendor.paystack_bank_code} · Account {vendor.paystack_account_number}
               </p>
             </div>
             <ApproveButton vendorId={vendor.id} />
@@ -52,15 +59,15 @@ export default async function AdminVendorsPage() {
         ))}
       </div>
 
-      <h2 className="text-lg font-medium mb-3">All other vendors</h2>
-      <div className="space-y-2">
+      <h2 className="text-sm text-[var(--color-ink-60)] mb-3">All other vendors</h2>
+      <div className="divide-y divide-[var(--color-line)]">
         {others.map((vendor) => (
-          <div key={vendor.id} className="border rounded p-3 flex justify-between text-sm">
+          <div key={vendor.id} className="py-3 flex justify-between text-sm">
             <span>{vendor.store_name}</span>
-            <span className="text-gray-500">{vendor.status}</span>
+            <span className="text-[var(--color-ink-50)]">{vendor.status}</span>
           </div>
         ))}
       </div>
-    </div>
+    </DashboardShell>
   );
 }

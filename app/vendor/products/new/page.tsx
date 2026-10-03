@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DashboardShell } from "@/app/components/dashboard-shell";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -45,15 +46,16 @@ export default function NewProductPage() {
     router.refresh();
   }
 
-  return (
-    <div className="max-w-lg mx-auto py-12 px-4">
-      <h1 className="text-2xl font-semibold mb-6">Add a product</h1>
+  const inputClass =
+    "w-full border border-[var(--color-line)] rounded-sm px-3 py-2 bg-[var(--color-paper-light)] focus:outline-none focus:border-[var(--color-moss)]";
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+  return (
+    <DashboardShell title="Add a piece" subtitle="Tell customers about what you made or grew">
+      <form onSubmit={handleSubmit} className="space-y-5 max-w-lg">
         <div>
-          <label className="block text-sm font-medium mb-1">Title</label>
+          <label className="block text-sm mb-1">Title</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -61,20 +63,20 @@ export default function NewProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">URL slug</label>
+          <label className="block text-sm mb-1">URL slug</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-            placeholder="blue-ceramic-mug"
+            placeholder="dried-pampas-bundle"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm mb-1">Description</label>
           <textarea
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
@@ -83,21 +85,21 @@ export default function NewProductPage() {
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Price (₦)</label>
+            <label className="block text-sm mb-1">Price (₦)</label>
             <input
               type="number"
               step="0.01"
-              className="w-full border rounded px-3 py-2"
+              className={inputClass}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               required
             />
           </div>
           <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Stock</label>
+            <label className="block text-sm mb-1">Stock</label>
             <input
               type="number"
-              className="w-full border rounded px-3 py-2"
+              className={inputClass}
               value={stock}
               onChange={(e) => setStock(e.target.value)}
               required
@@ -106,26 +108,26 @@ export default function NewProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Images</label>
+          <label className="block text-sm mb-1">Photos</label>
           <input
             type="file"
             accept="image/*"
             multiple
             onChange={(e) => setImages(e.target.files)}
-            className="w-full"
+            className="w-full text-sm"
           />
         </div>
 
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+          className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-3 hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
         >
-          {status === "loading" ? "Saving..." : "Create product"}
+          {status === "loading" ? "Saving..." : "List this piece"}
         </button>
 
-        {message && <p className="text-sm text-red-600">{message}</p>}
+        {message && <p className="text-sm text-[#A14A3F]">{message}</p>}
       </form>
-    </div>
+    </DashboardShell>
   );
 }

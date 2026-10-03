@@ -25,7 +25,7 @@ export default function ProductActions({ product }: { product: Product }) {
   }
 
   async function handleDelete() {
-    if (!confirm("Delete this product? This can't be undone.")) return;
+    if (!confirm("Delete this piece? This can't be undone.")) return;
     setLoading(true);
     await fetch(`/api/vendor/products/${product.id}`, { method: "DELETE" });
     setLoading(false);
@@ -33,18 +33,18 @@ export default function ProductActions({ product }: { product: Product }) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 shrink-0">
       <button
         onClick={toggleStatus}
         disabled={loading}
-        className="text-sm border rounded px-3 py-1.5 disabled:opacity-50"
+        className="text-sm border border-[var(--color-line)] rounded-sm px-3 py-1.5 hover:border-[var(--color-plum)] hover:text-[var(--color-plum)] transition-colors disabled:opacity-50"
       >
         {product.status === "published" ? "Unpublish" : "Publish"}
       </button>
       <button
         onClick={handleDelete}
         disabled={loading}
-        className="text-sm border border-red-300 text-red-600 rounded px-3 py-1.5 disabled:opacity-50"
+        className="text-sm border border-[var(--color-line)] text-[#A14A3F] rounded-sm px-3 py-1.5 hover:border-[#A14A3F] transition-colors disabled:opacity-50"
       >
         Delete
       </button>
