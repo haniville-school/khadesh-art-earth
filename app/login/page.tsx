@@ -13,6 +13,9 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
 
+  const inputClass =
+    "w-full border border-[var(--color-line)] rounded-sm px-3 py-2 bg-[var(--color-paper-light)] focus:outline-none focus:border-[var(--color-moss)]";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("loading");
@@ -31,15 +34,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="max-w-sm mx-auto py-12 px-4">
-      <h1 className="text-2xl font-semibold mb-6">Log in</h1>
+    <div className="max-w-sm mx-auto py-16 px-6">
+      <h1 className="font-display text-3xl mb-6">Log in</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
+          <label className="block text-sm mb-1">Email</label>
           <input
             type="email"
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -47,10 +50,10 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
+          <label className="block text-sm mb-1">Password</label>
           <input
             type="password"
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -60,16 +63,19 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+          className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-2 hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
         >
           {status === "loading" ? "Logging in..." : "Log in"}
         </button>
 
-        {message && <p className="text-sm text-red-600">{message}</p>}
+        {message && <p className="text-sm text-[#A14A3F]">{message}</p>}
       </form>
 
-      <p className="text-sm mt-4">
-        No account yet? <a href="/signup" className="underline">Sign up</a>
+      <p className="text-sm mt-4 text-[var(--color-ink-70)]">
+        No account yet?{" "}
+        <a href="/signup" className="text-[var(--color-plum)] underline underline-offset-4">
+          Sign up
+        </a>
       </p>
     </div>
   );

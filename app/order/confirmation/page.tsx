@@ -45,16 +45,18 @@ function OrderConfirmationContent() {
   }, [reference]);
 
   return (
-    <div className="max-w-md mx-auto py-20 px-4 text-center">
-      {status === "loading" && <p>Confirming your payment...</p>}
+    <div className="max-w-md mx-auto py-24 px-6 text-center">
+      {status === "loading" && (
+        <p className="text-[var(--color-ink-60)]">Confirming your payment...</p>
+      )}
 
       {status === "paid" && (
         <>
-          <h1 className="text-2xl font-semibold mb-2">Payment successful 🎉</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="font-display text-3xl mb-3">Payment successful</h1>
+          <p className="text-[var(--color-ink-70)] mb-6 leading-relaxed">
             Your order has been placed. You&apos;ll be contacted with shipping updates.
           </p>
-          <Link href="/" className="underline">
+          <Link href="/" className="text-[var(--color-plum)] underline underline-offset-4">
             Continue shopping
           </Link>
         </>
@@ -62,11 +64,11 @@ function OrderConfirmationContent() {
 
       {status === "failed" && (
         <>
-          <h1 className="text-2xl font-semibold mb-2">Payment not completed</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="font-display text-3xl mb-3">Payment not completed</h1>
+          <p className="text-[var(--color-ink-70)] mb-6 leading-relaxed">
             Your payment didn&apos;t go through. No charge was made.
           </p>
-          <Link href="/cart" className="underline">
+          <Link href="/cart" className="text-[var(--color-plum)] underline underline-offset-4">
             Back to cart
           </Link>
         </>
@@ -74,8 +76,8 @@ function OrderConfirmationContent() {
 
       {status === "error" && (
         <>
-          <h1 className="text-2xl font-semibold mb-2">Something went wrong</h1>
-          <p className="text-gray-600 mb-6">{message}</p>
+          <h1 className="font-display text-3xl mb-3">Something went wrong</h1>
+          <p className="text-[var(--color-ink-70)] mb-6">{message}</p>
         </>
       )}
     </div>
@@ -84,7 +86,13 @@ function OrderConfirmationContent() {
 
 export default function OrderConfirmationPage() {
   return (
-    <Suspense fallback={<div className="max-w-md mx-auto py-20 px-4 text-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="max-w-md mx-auto py-24 px-6 text-center text-[var(--color-ink-60)]">
+          Loading...
+        </div>
+      }
+    >
       <OrderConfirmationContent />
     </Suspense>
   );

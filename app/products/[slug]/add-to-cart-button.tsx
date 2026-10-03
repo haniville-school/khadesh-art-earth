@@ -36,14 +36,14 @@ export default function AddToCartButton(props: Props) {
       <button
         onClick={handleClick}
         disabled={props.stock === 0}
-        className="w-full bg-black text-white rounded px-4 py-3 disabled:opacity-50"
+        className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-3 hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
       >
-        {props.stock === 0 ? "Out of stock" : added ? "Added ✓" : "Add to cart"}
+        {props.stock === 0 ? "Out of stock" : added ? "Added" : "Add to cart"}
       </button>
       {added && (
         <button
           onClick={() => router.push("/cart")}
-          className="w-full border rounded px-4 py-2 text-sm"
+          className="w-full border border-[var(--color-line)] rounded-sm px-4 py-2 text-sm hover:border-[var(--color-plum)] hover:text-[var(--color-plum)] transition-colors"
         >
           View cart
         </button>

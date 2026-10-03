@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DashboardShell } from "@/app/components/dashboard-shell";
 
 type Bank = { id: number; name: string; code: string };
 
@@ -13,6 +14,9 @@ export default function VendorApplyPage() {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  const inputClass =
+    "w-full border border-[var(--color-line)] rounded-sm px-3 py-2 bg-[var(--color-paper-light)] focus:outline-none focus:border-[var(--color-moss)]";
 
   async function loadBanks() {
     if (banks.length > 0) return;
@@ -46,14 +50,12 @@ export default function VendorApplyPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto py-12 px-4">
-      <h1 className="text-2xl font-semibold mb-6">Become a vendor</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <DashboardShell title="Become a vendor" subtitle="Sell your pottery, art, or flowers on Khadesh Art">
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
         <div>
-          <label className="block text-sm font-medium mb-1">Store name</label>
+          <label className="block text-sm mb-1">Store name</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={storeName}
             onChange={(e) => setStoreName(e.target.value)}
             required
@@ -61,9 +63,9 @@ export default function VendorApplyPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Store URL slug</label>
+          <label className="block text-sm mb-1">Store URL slug</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             placeholder="my-store"
@@ -72,9 +74,9 @@ export default function VendorApplyPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm mb-1">Description</label>
           <textarea
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -82,9 +84,9 @@ export default function VendorApplyPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Bank</label>
+          <label className="block text-sm mb-1">Bank</label>
           <select
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={bankCode}
             onFocus={loadBanks}
             onChange={(e) => setBankCode(e.target.value)}
@@ -101,9 +103,9 @@ export default function VendorApplyPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Account number</label>
+          <label className="block text-sm mb-1">Account number</label>
           <input
-            className="w-full border rounded px-3 py-2"
+            className={inputClass}
             value={accountNumber}
             onChange={(e) => setAccountNumber(e.target.value)}
             required
@@ -113,17 +115,17 @@ export default function VendorApplyPage() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full bg-black text-white rounded px-4 py-2 disabled:opacity-50"
+          className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-2 hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
         >
           {status === "loading" ? "Submitting..." : "Submit application"}
         </button>
 
         {message && (
-          <p className={status === "error" ? "text-red-600" : "text-green-600"}>
+          <p className={status === "error" ? "text-sm text-[#A14A3F]" : "text-sm text-[var(--color-moss)]"}>
             {message}
           </p>
         )}
       </form>
-    </div>
+    </DashboardShell>
   );
 }

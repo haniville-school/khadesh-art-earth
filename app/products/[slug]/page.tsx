@@ -21,34 +21,30 @@ export default async function ProductPage({
   if (!product) notFound();
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 grid md:grid-cols-2 gap-10">
-      <div className="aspect-square bg-gray-100 rounded overflow-hidden relative">
-        {product.images?.[0] ? (
+    <div className="max-w-4xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-12">
+      <div className="aspect-square rounded-sm overflow-hidden relative bg-[var(--color-line)]">
+        {product.images?.[0] && (
           <Image
             src={product.images[0]}
             alt={product.title}
             fill
             className="object-cover"
           />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            No image
-          </div>
         )}
       </div>
 
       <div>
-        <h1 className="text-2xl font-semibold mb-1">{product.title}</h1>
-        <p className="text-sm text-gray-500 mb-4">
-          Sold by {product.vendors?.store_name}
+        <h1 className="font-display text-3xl mb-1">{product.title}</h1>
+        <p className="text-sm text-[var(--color-ink-50)] mb-4">
+          by {product.vendors?.store_name}
         </p>
-        <p className="text-xl font-medium mb-4">
+        <p className="font-display text-2xl text-[var(--color-ochre)] mb-5">
           ₦{Number(product.price).toLocaleString()}
         </p>
-        <p className="text-gray-700 mb-6 whitespace-pre-line">
+        <p className="text-[var(--color-ink-70)] mb-6 whitespace-pre-line leading-relaxed">
           {product.description}
         </p>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-[var(--color-ink-50)] mb-6">
           {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
         </p>
 
