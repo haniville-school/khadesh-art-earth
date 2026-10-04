@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardShell } from "@/app/components/dashboard-shell";
+import { slugify } from "@/lib/slugify";
 
 export default function NewProductPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -22,7 +22,6 @@ export default function NewProductPage() {
 
     const formData = new FormData();
     formData.set("title", title);
-    formData.set("slug", slug);
     formData.set("description", description);
     formData.set("price", price);
     formData.set("stock", stock);
@@ -62,16 +61,11 @@ export default function NewProductPage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm mb-1">URL slug</label>
-          <input
-            className={inputClass}
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            placeholder="dried-pampas-bundle"
-            required
-          />
-        </div>
+        {title.trim() && (
+          <p className="text-xs text-[var(--color-ink-50)] -mt-3">
+            Will be listed at /products/{slugify(title) || "..."}
+          </p>
+        )}
 
         <div>
           <label className="block text-sm mb-1">Description</label>

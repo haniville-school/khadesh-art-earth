@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Product = {
   id: string;
@@ -34,6 +35,12 @@ export default function ProductActions({ product }: { product: Product }) {
 
   return (
     <div className="flex gap-2 shrink-0">
+      <Link
+        href={`/vendor/products/${product.id}/edit`}
+        className="text-sm border border-[var(--color-line)] rounded-sm px-3 py-1.5 hover:border-[var(--color-moss)] transition-colors"
+      >
+        Edit
+      </Link>
       <button
         onClick={toggleStatus}
         disabled={loading}

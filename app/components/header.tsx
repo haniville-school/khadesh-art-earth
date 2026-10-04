@@ -1,10 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/cart-context";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Header() {
   const { totalItems } = useCart();
+  const [email, setEmail] = useState<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    supabase.auth.getUser().then(({ data }) => {
+      setEmail(data.user?.email ?? null);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   return (
     <header className="border-b border-[var(--color-line)] bg-[var(--color-paper-light)]">
@@ -22,6 +39,17 @@ export default function Header() {
           >
             Sell with us
           </Link>
+
+          {email === undefined ? null : email ? (
+            <Link href="/account" className="text-[var(--color-ink)]">
+              Account
+            </Link>
+          ) : (
+            <Link href="/login" className="text-[var(--color-ink)]">
+              Log in
+            </Link>
+          )}
+
           <Link href="/cart" className="relative text-[var(--color-ink)]">
             Cart
             {totalItems > 0 && (

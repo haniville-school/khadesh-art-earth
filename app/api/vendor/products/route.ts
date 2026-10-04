@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { slugify } from "@/lib/slugify";
 
 async function getOwnVendor(supabase: any, userId: string) {
   const { data } = await supabase
@@ -54,18 +55,39 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData();
-  const title = formData.get("title") as string;
-  const slug = formData.get("slug") as string;
+  const title = (formData.get("title") as string)?.trim();
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string, 10);
   const imageFiles = formData.getAll("images") as File[];
 
-  if (!title || !slug || isNaN(price) || isNaN(stock)) {
+  if (!title || isNaN(price) || isNaN(stock)) {
     return NextResponse.json(
-      { error: "title, slug, price and stock are required" },
+      { error: "title, price and stock are required" },
       { status: 400 }
     );
+  }
+
+  const baseSlug = slugify(title);
+  if (!baseSlug) {
+    return NextResponse.json(
+      { error: "Title must contain at least one letter or number" },
+      { status: 400 }
+    );
+  }
+
+  let slug = baseSlug;
+  let suffix = 2;
+  while (true) {
+    const { data: existing } = await supabase
+      .from("products")
+      .select("id")
+      .eq("vendor_id", vendor.id)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (!existing) break;
+    slug = `${baseSlug}-${suffix}`;
+    suffix++;
   }
 
   const imageUrls: string[] = [];
