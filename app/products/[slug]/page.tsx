@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import AddToCartButton from "./add-to-cart-button";
+import ImageGallery from "./image-gallery";
 
 export default async function ProductPage({
   params,
@@ -22,16 +22,7 @@ export default async function ProductPage({
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-12">
-      <div className="aspect-square rounded-sm overflow-hidden relative bg-[var(--color-line)]">
-        {product.images?.[0] && (
-          <Image
-            src={product.images[0]}
-            alt={product.title}
-            fill
-            className="object-cover"
-          />
-        )}
-      </div>
+      <ImageGallery images={product.images ?? []} title={product.title} />
 
       <div>
         <h1 className="font-display text-3xl mb-1">{product.title}</h1>
