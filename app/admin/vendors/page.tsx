@@ -34,6 +34,7 @@ export default async function AdminVendorsPage() {
       nav={[
         { href: "/admin", label: "Overview" },
         { href: "/admin/vendors", label: "Vendors" },
+        { href: "/admin/categories", label: "Categories" },
       ]}
     >
       <h2 className="text-sm text-[var(--color-ink-60)] mb-3">

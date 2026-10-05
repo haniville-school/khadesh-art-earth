@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { deleteStorageImages } from "@/lib/storage";
 
 export async function POST(
   req: NextRequest,
@@ -107,6 +108,8 @@ export async function DELETE(
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+
+  await deleteStorageImages(supabase, [imageUrl]);
 
   return NextResponse.json({ images: updated.images });
 }

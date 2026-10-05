@@ -5,27 +5,31 @@ import Image from "next/image";
 export default async function HomePage() {
   const supabase = await createServerSupabaseClient();
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, title, slug, price, images, vendors(store_name)")
-    .eq("status", "published")
-    .order("created_at", { ascending: false });
+  const [{ data: products }, { data: categories }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("id, title, slug, price, images, vendors(store_name)")
+      .eq("status", "published")
+      .order("created_at", { ascending: false }),
+    supabase.from("categories").select("name, slug").order("name"),
+  ]);
 
   const featured = (products ?? []).slice(0, 3);
   const all = products ?? [];
 
   return (
     <div>
-      <section className="max-w-5xl mx-auto px-6 pt-16 pb-20 grid md:grid-cols-2 gap-12 items-center">
+      <section className="max-w-5xl mx-auto px-6 pt-16 pb-12 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <h1 className="font-display text-5xl leading-[1.1] mb-6">
-            Handmade, grown,
+            Decor you love,
             <br />
-            and gathered.
+            or the makings of your own.
           </h1>
           <p className="text-[var(--color-ink-70)] mb-8 max-w-sm leading-relaxed">
-            Pottery, art, and decorative flowers from independent makers and
-            growers — every piece listed by the person who made or grew it.
+            Finished art, pottery, and flowers, alongside the seeds, vases,
+            resin, and tools behind them — from independent makers and
+            growers.
           </p>
           <Link
             href="#collection"
@@ -59,6 +63,22 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {categories && categories.length > 0 && (
+        <section className="max-w-3xl mx-auto px-6 pb-8">
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className="text-sm border border-[var(--color-line)] rounded-full px-3 py-1 hover:border-[var(--color-moss)] transition-colors"
+              >
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="collection" className="max-w-3xl mx-auto px-6 pb-24">
         <h2 className="font-display text-2xl mb-6">Fresh from the workshop</h2>

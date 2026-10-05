@@ -41,6 +41,7 @@ export default async function AdminHomePage() {
       nav={[
         { href: "/admin", label: "Overview" },
         { href: "/admin/vendors", label: "Vendors" },
+        { href: "/admin/categories", label: "Categories" },
       ]}
     >
       <div className="grid grid-cols-2 gap-px bg-[var(--color-line)] border border-[var(--color-line)]">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { deleteStorageImages } from "@/lib/storage";
 
 export async function PATCH(
   req: NextRequest,
@@ -48,10 +49,20 @@ export async function DELETE(
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
+  const { data: product } = await supabase
+    .from("products")
+    .select("images")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase.from("products").delete().eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+
+  if (product?.images?.length) {
+    await deleteStorageImages(supabase, product.images);
   }
 
   return NextResponse.json({ success: true });
