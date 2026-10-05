@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
 
   const [email, setEmail] = useState("");
@@ -29,7 +30,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    const next = searchParams.get("next") || "/";
+    router.push(next);
     router.refresh();
   }
 
@@ -78,5 +80,13 @@ export default function LoginPage() {
         </a>
       </p>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="max-w-sm mx-auto py-16 px-6">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

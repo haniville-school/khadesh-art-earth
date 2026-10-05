@@ -11,6 +11,11 @@ export default function SignUpPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -26,7 +31,14 @@ export default function SignUpPage() {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          phone,
+          address_line1: addressLine1,
+          address_line2: addressLine2,
+          city,
+          state,
+        },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
@@ -49,7 +61,10 @@ export default function SignUpPage() {
 
   return (
     <div className="max-w-sm mx-auto py-16 px-6">
-      <h1 className="font-display text-3xl mb-6">Create an account</h1>
+      <h1 className="font-display text-3xl mb-1">Create an account</h1>
+      <p className="text-sm text-[var(--color-ink-60)] mb-6">
+        Your shipping details save here so checkout is quick next time.
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -81,6 +96,54 @@ export default function SignUpPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             minLength={6}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Phone number</label>
+          <input
+            type="tel"
+            className={inputClass}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Address</label>
+          <input
+            className={inputClass}
+            value={addressLine1}
+            onChange={(e) => setAddressLine1(e.target.value)}
+            placeholder="Street address"
+            required
+          />
+        </div>
+
+        <div>
+          <input
+            className={inputClass}
+            value={addressLine2}
+            onChange={(e) => setAddressLine2(e.target.value)}
+            placeholder="Apartment, suite, etc. (optional)"
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <input
+            className={inputClass}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="City"
+            required
+          />
+          <input
+            className={inputClass}
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            placeholder="State"
             required
           />
         </div>

@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart/cart-context";
 import { createClient } from "@/lib/supabase/client";
 
 export default function Header() {
   const { totalItems } = useCart();
+  const router = useRouter();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -23,16 +26,35 @@ export default function Header() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (trimmed) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+    }
+  }
+
   return (
     <header className="border-b border-[var(--color-line)] bg-[var(--color-paper-light)]">
-      <div className="max-w-5xl mx-auto px-6 py-5 flex justify-between items-center">
+      <div className="max-w-5xl mx-auto px-6 py-5 flex flex-wrap items-center gap-4">
         <Link
           href="/"
-          className="font-display italic text-2xl tracking-tight text-[var(--color-ink)]"
+          className="font-display italic text-2xl tracking-tight text-[var(--color-ink)] shrink-0"
         >
           Khadesh Art
         </Link>
-        <nav className="flex items-center gap-6 text-sm">
+
+        <form onSubmit={handleSearch} className="flex-1 min-w-[160px] order-3 sm:order-none">
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search for pottery, art, flowers..."
+            className="w-full border border-[var(--color-line)] rounded-sm px-3 py-1.5 text-sm bg-[var(--color-paper)] focus:outline-none focus:border-[var(--color-moss)]"
+          />
+        </form>
+
+        <nav className="flex items-center gap-6 text-sm shrink-0 ml-auto">
           <Link
             href="/vendor/apply"
             className="text-[var(--color-plum)] hover:underline underline-offset-4"

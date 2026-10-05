@@ -3,39 +3,14 @@
 import { useCart } from "@/lib/cart/cart-context";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { calculateTransactionFee } from "@/lib/fees";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
-  const [checkingOut, setCheckingOut] = useState(false);
+  const router = useRouter();
   const transactionFee = calculateTransactionFee(totalPrice);
   const grandTotal = totalPrice + transactionFee;
-
-  async function handleCheckout() {
-    setCheckingOut(true);
-
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: items.map((i) => ({
-          productId: i.productId,
-          quantity: i.quantity,
-        })),
-      }),
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      alert(json.error || "Checkout failed. Please try again.");
-      setCheckingOut(false);
-      return;
-    }
-
-    window.location.href = json.authorizationUrl;
-  }
 
   if (items.length === 0) {
     return (
@@ -121,11 +96,10 @@ export default function CartPage() {
       </div>
 
       <button
-        onClick={handleCheckout}
-        disabled={checkingOut}
-        className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-3 hover:bg-[var(--color-moss-dark)] transition-colors disabled:opacity-50"
+        onClick={() => router.push("/checkout")}
+        className="w-full bg-[var(--color-moss)] text-white rounded-sm px-4 py-3 hover:bg-[var(--color-moss-dark)] transition-colors"
       >
-        {checkingOut ? "Redirecting..." : "Checkout"}
+        Checkout
       </button>
     </div>
   );
