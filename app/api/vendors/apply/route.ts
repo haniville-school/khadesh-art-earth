@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { resolveBankAccount } from "@/lib/paystack";
+import { slugify } from "@/lib/slugify";
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -16,14 +17,34 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { storeName, slug, description, bankCode, accountNumber } = body;
 
-  if (!storeName || !slug || !bankCode || !accountNumber) {
+  if (!storeName?.trim() || !bankCode || !accountNumber) {
     return NextResponse.json(
-      { error: "storeName, slug, bankCode and accountNumber are required" },
+      { error: "Store name, bank and account number are required" },
       { status: 400 }
     );
   }
 
-  // Confirm the account belongs to the applicant before we store it.
+  const cleanSlug = slugify(slug || storeName);
+  if (!cleanSlug) {
+    return NextResponse.json(
+      { error: "The store URL must contain at least one letter or number" },
+      { status: 400 }
+    );
+  }
+
+  const { data: existing } = await supabase
+    .from("vendors")
+    .select("id")
+    .eq("profile_id", user.id)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return NextResponse.json(
+      { error: "You've already applied to sell. Check your account page for its status." },
+      { status: 400 }
+    );
+  }
+
   let resolvedAccountName: string;
   try {
     const resolved = await resolveBankAccount(accountNumber, bankCode);
@@ -39,8 +60,8 @@ export async function POST(req: NextRequest) {
     .from("vendors")
     .insert({
       profile_id: user.id,
-      store_name: storeName,
-      slug,
+      store_name: storeName.trim(),
+      slug: cleanSlug,
       description,
       paystack_bank_code: bankCode,
       paystack_account_number: accountNumber,
@@ -50,6 +71,12 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "That store URL is already taken. Try a different one." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createPaystackSubaccount } from "@/lib/paystack";
+import { notifyVendorApproved } from "@/lib/notifications";
 
 export async function POST(req: NextRequest) {
   const supabase = await createServerSupabaseClient();
@@ -72,6 +73,8 @@ export async function POST(req: NextRequest) {
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 400 });
   }
+
+    await notifyVendorApproved(vendorId);
 
   return NextResponse.json({ vendor: updated });
 }

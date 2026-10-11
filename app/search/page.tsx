@@ -1,26 +1,35 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import { Pagination } from "@/app/components/pagination";
+
+const PAGE_SIZE = 20;
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, page } = await searchParams;
   const query = (q ?? "").trim();
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = await createServerSupabaseClient();
 
-  const { data: results } = query
+  const { data: results, count } = query
     ? await supabase
         .from("products")
-        .select("id, title, slug, price, images, vendors(store_name)")
+        .select("id, title, slug, price, images, vendors(store_name)", { count: "exact" })
         .eq("status", "published")
         .ilike("title", `%${query}%`)
         .order("created_at", { ascending: false })
-    : { data: [] };
+        .range(from, to)
+    : { data: [], count: 0 };
 
   const products = results ?? [];
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
@@ -28,7 +37,7 @@ export default async function SearchPage({
         {query ? `Results for "${query}"` : "Search"}
       </h1>
       <p className="text-sm text-[var(--color-ink-50)] mb-8">
-        {query && `${products.length} piece${products.length === 1 ? "" : "s"} found`}
+        {query && `${count ?? 0} piece${(count ?? 0) === 1 ? "" : "s"} found`}
       </p>
 
       {query && products.length === 0 && (
@@ -70,6 +79,12 @@ export default async function SearchPage({
           </Link>
         ))}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => `/search?q=${encodeURIComponent(query)}&page=${p}`}
+      />
     </div>
   );
 }

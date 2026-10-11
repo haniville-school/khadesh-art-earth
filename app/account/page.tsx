@@ -29,6 +29,13 @@ export default async function AccountPage() {
     <DashboardShell title={profile?.full_name || "Your account"} subtitle={user.email ?? undefined}>
       <div className="space-y-8">
         <div className="space-y-3">
+          <Link
+            href="/account/orders"
+            className="block border border-[var(--color-line)] rounded-sm px-4 py-3 hover:border-[var(--color-moss)] transition-colors"
+          >
+            Order history
+          </Link>
+
           {vendor ? (
             <Link
               href="/vendor/products"

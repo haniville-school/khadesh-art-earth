@@ -42,6 +42,7 @@ export default async function AdminHomePage() {
         { href: "/admin", label: "Overview" },
         { href: "/admin/vendors", label: "Vendors" },
         { href: "/admin/categories", label: "Categories" },
+        { href: "/admin/orders", label: "Orders" },
       ]}
     >
       <div className="grid grid-cols-2 gap-px bg-[var(--color-line)] border border-[var(--color-line)]">

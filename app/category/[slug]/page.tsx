@@ -2,13 +2,23 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { Pagination } from "@/app/components/pagination";
+
+const PAGE_SIZE = 20;
 
 export default async function CategoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
   const { slug } = await params;
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = await createServerSupabaseClient();
 
   const { data: category } = await supabase
@@ -19,14 +29,16 @@ export default async function CategoryPage({
 
   if (!category) notFound();
 
-  const { data: products } = await supabase
+  const { data: products, count } = await supabase
     .from("products")
-    .select("id, title, slug, price, images, vendors(store_name)")
+    .select("id, title, slug, price, images, vendors(store_name)", { count: "exact" })
     .eq("status", "published")
     .eq("category_id", category.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   const all = products ?? [];
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
@@ -68,6 +80,12 @@ export default async function CategoryPage({
           </Link>
         ))}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => (p === 1 ? `/category/${slug}` : `/category/${slug}?page=${p}`)}
+      />
     </div>
   );
 }

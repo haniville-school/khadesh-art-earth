@@ -2,9 +2,21 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { DashboardShell } from "@/app/components/dashboard-shell";
+import { Pagination } from "@/app/components/pagination";
 import ProductActions from "./product-actions";
 
-export default async function VendorProductsPage() {
+const PAGE_SIZE = 20;
+
+export default async function VendorProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -15,7 +27,7 @@ export default async function VendorProductsPage() {
 
   const { data: vendor } = await supabase
     .from("vendors")
-    .select("id, store_name, status")
+        .select("id, store_name, slug, status")
     .eq("profile_id", user.id)
     .single();
 
@@ -33,11 +45,14 @@ export default async function VendorProductsPage() {
     );
   }
 
-  const { data: products } = await supabase
+  const { data: products, count } = await supabase
     .from("products")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq("vendor_id", vendor.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <DashboardShell
@@ -47,8 +62,22 @@ export default async function VendorProductsPage() {
           ? "Your listings"
           : "Pending approval — listings won't be visible to customers yet"
       }
+      nav={[
+        { href: "/vendor/products", label: "Products" },
+        { href: "/vendor/orders", label: "Orders" },
+      ]}
     >
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-between items-center mb-6">
+        {vendor.status === "approved" ? (
+          <Link
+            href={`/store/${vendor.slug}`}
+            className="text-sm text-[var(--color-plum)] underline underline-offset-4"
+          >
+            View your storefront
+          </Link>
+        ) : (
+          <span />
+        )}
         <Link
           href="/vendor/products/new"
           className="bg-[var(--color-moss)] text-white rounded-sm px-4 py-2 text-sm hover:bg-[var(--color-moss-dark)] transition-colors"
@@ -77,6 +106,12 @@ export default async function VendorProductsPage() {
           </div>
         ))}
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildHref={(p) => (p === 1 ? "/vendor/products" : `/vendor/products?page=${p}`)}
+      />
     </DashboardShell>
   );
 }

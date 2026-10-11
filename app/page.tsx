@@ -1,21 +1,40 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Image from "next/image";
+import { Pagination } from "@/app/components/pagination";
 
-export default async function HomePage() {
+const PAGE_SIZE = 20;
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page ?? "1", 10) || 1);
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: products }, { data: categories }] = await Promise.all([
+  const [{ data: featured }, { data: products, count }, { data: categories }] = await Promise.all([
     supabase
       .from("products")
-      .select("id, title, slug, price, images, vendors(store_name)")
+      .select("id, title, images")
       .eq("status", "published")
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase
+      .from("products")
+      .select("id, title, slug, price, images, vendors(store_name)", { count: "exact" })
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .range(from, to),
     supabase.from("categories").select("name, slug").order("name"),
   ]);
 
-  const featured = (products ?? []).slice(0, 3);
   const all = products ?? [];
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
     <div>
@@ -40,7 +59,7 @@ export default async function HomePage() {
         </div>
 
         <div className="relative h-72 hidden md:block">
-          {featured.map((product, i) => (
+          {(featured ?? []).map((product, i) => (
             <div
               key={product.id}
               className="absolute w-40 h-40 rounded-sm overflow-hidden border-4 border-[var(--color-paper-light)] shadow-sm bg-[var(--color-line)]"
@@ -121,6 +140,12 @@ export default async function HomePage() {
             </Link>
           ))}
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          buildHref={(p) => (p === 1 ? "/#collection" : `/?page=${p}#collection`)}
+        />
       </section>
     </div>
   );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
+import { deleteStorageImages } from "@/lib/storage";
 
 async function getOwnVendor(supabase: any, userId: string) {
   const { data } = await supabase
@@ -59,6 +60,7 @@ export async function POST(req: NextRequest) {
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
   const stock = parseInt(formData.get("stock") as string, 10);
+  const categoryId = (formData.get("categoryId") as string) || null;
   const imageFiles = formData.getAll("images") as File[];
 
   if (!title || isNaN(price) || isNaN(stock)) {
@@ -76,20 +78,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let slug = baseSlug;
-  let suffix = 2;
-  while (true) {
-    const { data: existing } = await supabase
-      .from("products")
-      .select("id")
-      .eq("vendor_id", vendor.id)
-      .eq("slug", slug)
-      .maybeSingle();
-    if (!existing) break;
-    slug = `${baseSlug}-${suffix}`;
-    suffix++;
-  }
-
   const imageUrls: string[] = [];
   for (const file of imageFiles) {
     if (!file || file.size === 0) continue;
@@ -102,6 +90,7 @@ export async function POST(req: NextRequest) {
       .upload(path, file);
 
     if (uploadError) {
+      await deleteStorageImages(supabase, imageUrls);
       return NextResponse.json(
         { error: `Image upload failed: ${uploadError.message}` },
         { status: 400 }
@@ -115,23 +104,46 @@ export async function POST(req: NextRequest) {
     imageUrls.push(publicUrlData.publicUrl);
   }
 
-  const { data: product, error } = await supabase
-    .from("products")
-    .insert({
-      vendor_id: vendor.id,
-      title,
-      slug,
-      description,
-      price,
-      stock,
-      images: imageUrls,
-      status: "published",
-    })
-    .select()
-    .single();
+  // Slugs are unique across the whole store. If another listing (any vendor,
+  // including drafts we can't see) already has this slug, the database rejects
+  // the insert and we retry with a numeric suffix.
+  let product: any = null;
+  let lastError: { code?: string; message: string } | null = null;
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const slug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`;
+
+    const { data, error } = await supabase
+      .from("products")
+      .insert({
+        vendor_id: vendor.id,
+        category_id: categoryId,
+        title,
+        slug,
+        description,
+        price,
+        stock,
+        images: imageUrls,
+        status: "published",
+      })
+      .select()
+      .single();
+
+    if (!error) {
+      product = data;
+      break;
+    }
+
+    lastError = error;
+    if (error.code !== "23505") break;
+  }
+
+  if (!product) {
+    await deleteStorageImages(supabase, imageUrls);
+    return NextResponse.json(
+      { error: lastError?.message ?? "Could not create the product" },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json({ product });

@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/app/components/dashboard-shell";
 import ApproveButton from "./approve-button";
+import CommissionEditor from "./commission-editor";
 
 export default async function AdminVendorsPage() {
   const supabase = await createServerSupabaseClient();
@@ -35,6 +36,7 @@ export default async function AdminVendorsPage() {
         { href: "/admin", label: "Overview" },
         { href: "/admin/vendors", label: "Vendors" },
         { href: "/admin/categories", label: "Categories" },
+        { href: "/admin/orders", label: "Orders" },
       ]}
     >
       <h2 className="text-sm text-[var(--color-ink-60)] mb-3">
@@ -54,6 +56,9 @@ export default async function AdminVendorsPage() {
               <p className="text-xs text-[var(--color-ink-40)] mt-1">
                 Bank {vendor.paystack_bank_code} · Account {vendor.paystack_account_number}
               </p>
+              <div className="mt-2">
+                <CommissionEditor vendorId={vendor.id} initialRate={Number(vendor.commission_rate)} />
+              </div>
             </div>
             <ApproveButton vendorId={vendor.id} />
           </div>
@@ -63,9 +68,12 @@ export default async function AdminVendorsPage() {
       <h2 className="text-sm text-[var(--color-ink-60)] mb-3">All other vendors</h2>
       <div className="divide-y divide-[var(--color-line)]">
         {others.map((vendor) => (
-          <div key={vendor.id} className="py-3 flex justify-between text-sm">
-            <span>{vendor.store_name}</span>
-            <span className="text-[var(--color-ink-50)]">{vendor.status}</span>
+          <div key={vendor.id} className="py-3 flex justify-between items-center gap-4">
+            <div>
+              <span>{vendor.store_name}</span>
+              <span className="text-[var(--color-ink-50)] text-sm ml-2">{vendor.status}</span>
+            </div>
+            <CommissionEditor vendorId={vendor.id} initialRate={Number(vendor.commission_rate)} />
           </div>
         ))}
       </div>

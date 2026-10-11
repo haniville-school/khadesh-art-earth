@@ -30,6 +30,7 @@ export default async function AdminCategoriesPage() {
         { href: "/admin", label: "Overview" },
         { href: "/admin/vendors", label: "Vendors" },
         { href: "/admin/categories", label: "Categories" },
+        { href: "/admin/orders", label: "Orders" },
       ]}
     >
       <CategoryManager initialCategories={categories ?? []} />

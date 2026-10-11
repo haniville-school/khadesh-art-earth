@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import GoogleButton from "@/app/components/google-button";
 
 function LoginForm() {
   const router = useRouter();
@@ -13,6 +14,11 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  const authFailed = searchParams.get("error") === "auth_failed";
+
+  const rawNext = searchParams.get("next") || "/";
+  const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   const inputClass =
     "w-full border border-[var(--color-line)] rounded-sm px-3 py-2 bg-[var(--color-paper-light)] focus:outline-none focus:border-[var(--color-moss)]";
@@ -30,7 +36,6 @@ function LoginForm() {
       return;
     }
 
-    const next = searchParams.get("next") || "/";
     router.push(next);
     router.refresh();
   }
@@ -38,6 +43,20 @@ function LoginForm() {
   return (
     <div className="max-w-sm mx-auto py-16 px-6">
       <h1 className="font-display text-3xl mb-6">Log in</h1>
+
+      {authFailed && (
+        <p className="text-sm text-[#A14A3F] mb-4">
+          Sign-in didn&apos;t complete. Please try again.
+        </p>
+      )}
+
+      <GoogleButton next={next} />
+
+      <div className="flex items-center gap-3 my-5 text-xs text-[var(--color-ink-50)]">
+        <span className="flex-1 border-t border-[var(--color-line)]" />
+        or log in with email
+        <span className="flex-1 border-t border-[var(--color-line)]" />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -52,7 +71,15 @@ function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Password</label>
+          <div className="flex justify-between items-baseline mb-1">
+            <label className="block text-sm">Password</label>
+            <a
+              href="/forgot-password"
+              className="text-xs text-[var(--color-plum)] underline underline-offset-4"
+            >
+              Forgot password?
+            </a>
+          </div>
           <input
             type="password"
             className={inputClass}

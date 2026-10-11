@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import GoogleButton from "@/app/components/google-button";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -65,6 +66,14 @@ export default function SignUpPage() {
       <p className="text-sm text-[var(--color-ink-60)] mb-6">
         Your shipping details save here so checkout is quick next time.
       </p>
+
+      <GoogleButton next="/" />
+
+      <div className="flex items-center gap-3 my-5 text-xs text-[var(--color-ink-50)]">
+        <span className="flex-1 border-t border-[var(--color-line)]" />
+        or sign up with email
+        <span className="flex-1 border-t border-[var(--color-line)]" />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
